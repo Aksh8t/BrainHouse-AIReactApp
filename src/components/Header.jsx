@@ -1,5 +1,7 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { disablePageScroll, enablePageScroll } from "scroll-lock";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
+
 
 import { brainwave } from "../assets";
 import { navigation } from "../constants";
@@ -9,7 +11,7 @@ import { HamburgerMenu } from "./design/Header";
 import { useState } from "react";
 
 const Header = () => {
-  const pathname = useLocation();
+  const { pathname } = useLocation();
   const [openNavigation, setOpenNavigation] = useState(false);
 
   const toggleNavigation = () => {
@@ -66,16 +68,24 @@ const Header = () => {
 
           <HamburgerMenu />
         </nav>
+        
+        <SignedOut>
+          <Link
+            to="/sign-up"
+            className="hidden mr-8 text-n-1/50 transition-colors hover:text-n-1 lg:block"
+          >
+            New account
+          </Link>
+          <SignInButton mode="modal" redirectUrl="/">
+            <Button className="hidden lg:flex">
+              Sign in
+            </Button>
+          </SignInButton>
+        </SignedOut>
 
-        <a
-          href="#signup"
-          className="button hidden mr-8 text-n-1/50 transition-colors hover:text-n-1 lg:block"
-        >
-          New account
-        </a>
-        <Button className="hidden lg:flex" href="#login">
-          Sign in
-        </Button>
+        <SignedIn>
+          <UserButton afterSignOutUrl="/" />
+        </SignedIn>
 
         <Button
           className="ml-auto lg:hidden"
