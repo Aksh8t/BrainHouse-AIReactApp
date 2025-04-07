@@ -25,7 +25,7 @@ const Hero = () => {
           <h1 className="h1 mb-6">
             Explore the Possibilities of&nbsp;AI&nbsp;Chatting with {` `}
             <span className="inline-block relative">
-              Brainwave{" "}
+              BrainHouse{" "}
               <img
                 src={curve}
                 className="absolute top-full left-0 w-full xl:-mt-2"
@@ -36,10 +36,10 @@ const Hero = () => {
             </span>
           </h1>
           <p className="body-1 max-w-3xl mx-auto mb-6 text-n-2 lg:mb-8">
-            Unleash the power of AI within Brainwave. Upgrade your productivity
-            with Brainwave, the open AI chat app.
+            Unleash the power of AI within BrainHouse. Upgrade your productivity
+            with BrainHouse, the open AI Chat & Collaboration app.
           </p>
-          <Button href="/pricing" white>
+          <Button href="/chat" white>
             Get started
           </Button>
         </div>
