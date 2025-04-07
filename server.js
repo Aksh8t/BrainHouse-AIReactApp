@@ -1,22 +1,18 @@
 import express from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import OpenAI from "openai"; // Use ES Module import
+import OpenAI from "openai"; t
 import dotenv from "dotenv";
 import cors from "cors";
 
-// Load environment variables
 dotenv.config();
 
-// Log the API keys to verify they're loaded
 console.log("GEMINI_API_KEY:", process.env.GEMINI_API_KEY);
 console.log("NEBIUS_API_KEY:", process.env.NEBIUS_API_KEY);
 
-// Initialize Express app
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Initialize Gemini API with system instruction
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const geminiModel = genAI.getGenerativeModel({
   model: "gemini-1.5-flash",
@@ -24,18 +20,15 @@ const geminiModel = genAI.getGenerativeModel({
     "You are a research assistant AI designed to help researchers. You can assist with article generation, summarizing research papers, answering research-related questions, and generating ideas for experiments. For image generation requests, I will handle them separately. Provide detailed, accurate, and professional responses suitable for academic and research purposes.",
 });
 
-// Initialize Nebius Studio API (OpenAI-compatible)
 const nebiusClient = new OpenAI({
   baseURL: "https://api.studio.nebius.com/v1/",
   apiKey: process.env.NEBIUS_API_KEY,
 });
 
-// Endpoint for text generation (using Gemini API)
 app.post("/api/text", async (req, res) => {
   try {
     const { messages } = req.body;
 
-    // Validate request body
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: "Invalid or missing messages array" });
     }
