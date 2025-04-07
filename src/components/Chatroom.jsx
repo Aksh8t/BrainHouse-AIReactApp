@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 
 const Chatroom = () => {
-  const [messages, setMessages] = useState([]); // Removed the system message
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState("text"); // "text" for Gemini, "image" for Replicate
+  const [mode, setMode] = useState("text"); // "text" for Gemini, "image" for Nebius
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
@@ -23,25 +23,31 @@ const Chatroom = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ messages: [...messages, userMessage] }),
         });
+        if (!response.ok) {
+          throw new Error(`Text generation failed: ${response.statusText}`);
+        }
         const data = await response.json();
-        setMessages((prev) => [...prev, { role: "assistant", content: data.content }]);
+        setMessages((prev) => [...prev, { role: "model", content: data.content }]);
       } else if (mode === "image") {
         const response = await fetch("http://localhost:5000/api/image", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prompt: input }),
         });
+        if (!response.ok) {
+          throw new Error(`Image generation failed: ${response.statusText}`);
+        }
         const data = await response.json();
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: "Generated image:", image: data.image },
+          { role: "model", content: "Generated image:", image: data.image },
         ]);
       }
     } catch (error) {
       console.error("Error:", error);
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Sorry, something went wrong. Please try again." },
+        { role: "model", content: `Error: ${error.message}` },
       ]);
     } finally {
       setLoading(false);
