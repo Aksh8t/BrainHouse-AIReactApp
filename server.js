@@ -33,21 +33,46 @@ app.post("/api/text", async (req, res) => {
       return res.status(400).json({ error: "Invalid or missing messages array" });
     }
 
-    // Map roles to Gemini-compatible roles ("assistant" -> "model")
+    const lastUserMessage = messages[messages.length - 1];
+
     const chatHistory = messages
-      .filter((msg) => msg.role !== "system")
+      .filter((msg, index) => msg.role !== "system" && index < messages.length - 1)
       .map((msg) => ({
         role: msg.role === "assistant" ? "model" : msg.role,
         parts: [{ text: msg.content }],
       }));
 
-    // Start a chat session with the filtered history
     const chat = geminiModel.startChat({
       history: chatHistory,
     });
 
-    // Send the latest user message
-    const result = await chat.sendMessage(messages[messages.length - 1].content);
+    const parts = [{ text: lastUserMessage.content || "" }];
+
+    // Handle image files if they exist
+    if (lastUserMessage.files && lastUserMessage.files.length > 0) {
+      for (const file of lastUserMessage.files) {
+        if (file.type.startsWith("image/")) {
+          try {
+            // Ensure file.data is a base64 string
+            if (file.data && typeof file.data === "string" && file.data.startsWith("data:image")) {
+              const base64Data = file.data.split(",")[1];
+              parts.push({
+                inlineData: {
+                  data: base64Data,
+                  mimeType: file.type,
+                },
+              });
+            } else {
+              console.warn("Invalid base64 data for file:", file.name);
+            }
+          } catch (imageError) {
+            console.error("Error processing image:", imageError);
+          }
+        }
+      }
+    }
+
+    const result = await chat.sendMessage(parts);
     res.json({ content: result.response.text() });
   } catch (error) {
     console.error("Error calling Gemini API:", error);
@@ -60,12 +85,10 @@ app.post("/api/image", async (req, res) => {
   try {
     const { prompt } = req.body;
 
-    // Validate request body
     if (!prompt || typeof prompt !== "string") {
       return res.status(400).json({ error: "Invalid or missing prompt" });
     }
 
-    // Generate image using Nebius Studio API
     const response = await nebiusClient.images.generate({
       model: "stability-ai/sdxl",
       response_format: "b64_json",
@@ -80,9 +103,8 @@ app.post("/api/image", async (req, res) => {
       prompt: prompt,
     });
 
-    // Extract the base64-encoded image data
     const imageBase64 = response.data[0].b64_json;
-    const imageUrl = `data:image/png;base64,${imageBase64}`; // Convert to data URL for the client
+    const imageUrl = `data:image/png;base64,${imageBase64}`;
 
     res.json({ image: imageUrl });
   } catch (error) {
@@ -91,6 +113,5 @@ app.post("/api/image", async (req, res) => {
   }
 });
 
-// Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
