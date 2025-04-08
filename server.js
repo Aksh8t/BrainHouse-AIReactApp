@@ -1,6 +1,6 @@
 import express from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import OpenAI from "openai"; t
+import OpenAI from "openai";
 import dotenv from "dotenv";
 import cors from "cors";
 
