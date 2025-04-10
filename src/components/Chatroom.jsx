@@ -142,7 +142,7 @@ const Chatroom = () => {
       <SignedIn>
         <div className="flex flex-col h-screen bg-black text-white relative">
           <div className="absolute inset-0 z-0">
-            <svg className="w-full h-full opacity-10" width="100%" height="100%">
+            <svg className="w-full h-full opacity-15" width="100%" height="100%">
               <pattern id="dotPattern" width="20" height="20" patternUnits="userSpaceOnUse">
                 <circle cx="2" cy="2" r="1" fill="white" />
               </pattern>
@@ -161,7 +161,7 @@ const Chatroom = () => {
             </div>
 
             <div
-              className="flex-1 px-4 md:px-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent"
+              className="flex-1 px-4 md:px-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent pb-24"
               style={{ overscrollBehavior: "contain" }}
             >
               {messages.length === 0 && (
@@ -232,148 +232,144 @@ const Chatroom = () => {
               <div ref={messagesEndRef} />
             </div>
 
-            {uploadedFiles.length > 0 && (
-              <div className="files-preview px-4 md:px-6 pt-2 bg-transparent">
-                <div className="flex flex-wrap gap-2">
-                  {uploadedFiles.map((file, index) => (
-                    <div key={index} className="relative bg-gray-800 rounded-lg p-1">
-                      {file.type.startsWith("image/") ? (
-                        <div className="relative">
-                          <img
-                            src={file.url}
-                            alt={file.name}
-                            className="h-16 rounded object-cover"
-                          />
-                          <button
-                            onClick={() => removeFile(index)}
-                            className="absolute -top-2 -right-2 bg-gray-900 rounded-full p-1 hover:bg-red-600 transition-colors"
-                          >
-                            <X size={14} />
-                          </button>
+            <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 max-w-4xl w-full px-4 md:px-6 z-20">
+              <div className="bg-gray-800 rounded-xl shadow-xl p-4 border border-gray-700">
+                {uploadedFiles.length > 0 && (
+                  <div className="files-preview pb-3">
+                    <div className="flex flex-wrap gap-2">
+                      {uploadedFiles.map((file, index) => (
+                        <div key={index} className="relative bg-gray-900 rounded-lg p-1">
+                          {file.type.startsWith("image/") ? (
+                            <div className="relative">
+                              <img
+                                src={file.url}
+                                alt={file.name}
+                                className="h-16 rounded object-cover"
+                              />
+                              <button
+                                onClick={() => removeFile(index)}
+                                className="absolute -top-2 -right-2 bg-gray-900 rounded-full p-1 hover:bg-red-600 transition-colors"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center pr-6 pl-2 py-1">
+                              <span className="text-xs truncate max-w-xs" title={file.name}>
+                                {file.name}
+                              </span>
+                              <button
+                                onClick={() => removeFile(index)}
+                                className="absolute -top-2 -right-2 bg-gray-900 rounded-full p-1 hover:bg-red-600 transition-colors"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        <div className="flex items-center pr-6 pl-2 py-1">
-                          <span className="text-xs truncate max-w-xs" title={file.name}>
-                            {file.name}
-                          </span>
-                          <button
-                            onClick={() => removeFile(index)}
-                            className="absolute -top-2 -right-2 bg-gray-900 rounded-full p-1 hover:bg-red-600 transition-colors"
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="px-4 md:px-6 py-4 bg-transparent">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <button
-                    className="px-3 py-2 bg-gray-800 rounded-lg text-sm flex items-center hover:bg-gray-700 transition-colors"
-                    onClick={() => setModelDropdownOpen(!modelDropdownOpen)}
-                  >
-                    <span>{selectedModel}</span>
-                    <ChevronDown size={16} className="ml-2" />
-                  </button>
-
-                  {modelDropdownOpen && (
-                    <div className="absolute bottom-full mb-2 bg-gray-800 border border-gray-700 rounded-lg shadow-lg w-48 z-10">
-                      {models.map((model) => (
-                        <button
-                          key={model}
-                          className="block w-full text-left px-4 py-2 hover:bg-gray-700 text-sm transition-colors"
-                          onClick={() => {
-                            setSelectedModel(model);
-                            setModelDropdownOpen(false);
-                          }}
-                        >
-                          {model}
-                        </button>
                       ))}
                     </div>
-                  )}
-                </div>
-
-                <div className="flex p-1 bg-gray-800 rounded-lg">
-                  <button
-                    onClick={() => setMode("text")}
-                    className={`px-3 py-1 rounded-md text-sm transition-colors ${
-                      mode === "text" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
-                    }`}
-                  >
-                    Text
-                  </button>
-                  <button
-                    onClick={() => setMode("image")}
-                    className={`px-3 py-1 rounded-md text-sm transition-colors ${
-                      mode === "image" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
-                    }`}
-                  >
-                    Image
-                  </button>
-                </div>
-
-                {mode === "text" && (
-                  <button
-                    onClick={() => fileInputRef.current.click()}
-                    className="p-2 bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
-                  >
-                    <Upload size={20} />
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      multiple
-                      className="hidden"
-                      onChange={handleFileInput}
-                    />
-                  </button>
+                  </div>
                 )}
-
-                <div
-                  className={`flex-1 relative ${dragActive ? "border-2 border-blue-500" : "border border-gray-700"} rounded-lg bg-gray-800 shadow-lg`}
-                  onDragEnter={handleDrag}
-                >
-                  <input
-                    id="chat-input"
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                    placeholder={
-                      mode === "text"
-                        ? "Ask for research help, article generation, etc..."
-                        : "Describe the image you want to generate..."
-                    }
-                    className="w-full p-3 bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    onDragOver={handleDrag}
-                    onDragLeave={handleDrag}
-                    onDrop={handleDrop}
-                  />
-                  {dragActive && (
-                    <div
-                      className="absolute inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center rounded-lg"
-                      onDragEnter={handleDrag}
+                <div className="flex items-center gap-3 w-full">
+                  <div className="relative">
+                    <button
+                      className="px-3 py-2 bg-gray-900 rounded-lg text-sm flex items-center hover:bg-gray-700 transition-colors"
+                      onClick={() => setModelDropdownOpen(!modelDropdownOpen)}
+                    >
+                      <span>{selectedModel}</span>
+                      <ChevronDown size={16} className="ml-2" />
+                    </button>
+                    {modelDropdownOpen && (
+                      <div className="absolute bottom-full mb-2 bg-gray-800 border border-gray-700 rounded-lg shadow-lg w-48 z-10">
+                        {models.map((model) => (
+                          <button
+                            key={model}
+                            className="block w-full text-left px-4 py-2 hover:bg-gray-700 text-sm transition-colors"
+                            onClick={() => {
+                              setSelectedModel(model);
+                              setModelDropdownOpen(false);
+                            }}
+                          >
+                            {model}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex p-1 bg-gray-900 rounded-lg">
+                    <button
+                      onClick={() => setMode("text")}
+                      className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                        mode === "text" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
+                      }`}
+                    >
+                      Text
+                    </button>
+                    <button
+                      onClick={() => setMode("image")}
+                      className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                        mode === "image" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
+                      }`}
+                    >
+                      Image
+                    </button>
+                  </div>
+                  {mode === "text" && (
+                    <button
+                      onClick={() => fileInputRef.current.click()}
+                      className="p-2 bg-gray-900 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                    >
+                      <Upload size={20} />
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        className="hidden"
+                        onChange={handleFileInput}
+                      />
+                    </button>
+                  )}
+                  <div
+                    className={`flex-1 relative ${dragActive ? "border-2 border-blue-500" : "border border-gray-700"} rounded-lg bg-gray-900 shadow-inner`}
+                    onDragEnter={handleDrag}
+                  >
+                    <input
+                      id="chat-input"
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                      placeholder={
+                        mode === "text"
+                          ? "Ask for research help, article generation, etc..."
+                          : "Describe the image you want to generate..."
+                      }
+                      className="w-full p-3 bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       onDragOver={handleDrag}
                       onDragLeave={handleDrag}
                       onDrop={handleDrop}
-                    >
-                      <p className="text-blue-400">Drop files here</p>
-                    </div>
-                  )}
+                    />
+                    {dragActive && (
+                      <div
+                        className="absolute inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center rounded-lg"
+                        onDragEnter={handleDrag}
+                        onDragOver={handleDrag}
+                        onDragLeave={handleDrag}
+                        onDrop={handleDrop}
+                      >
+                        <p className="text-blue-400">Drop files here</p>
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={handleSendMessage}
+                    disabled={loading}
+                    className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  >
+                    <Send size={20} />
+                  </button>
                 </div>
-
-                <button
-                  onClick={handleSendMessage}
-                  disabled={loading}
-                  className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                >
-                  <Send size={20} />
-                </button>
               </div>
             </div>
           </div>
