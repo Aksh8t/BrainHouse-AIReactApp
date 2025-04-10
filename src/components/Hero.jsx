@@ -40,7 +40,7 @@ const Hero = () => {
             with BrainHouse, the open AI Chat & Collaboration app.
           </p>
           <Button href="/chat" white>
-            Get started
+            TRY CHAT NOW
           </Button>
         </div>
         <div className="relative max-w-[23rem] mx-auto md:max-w-5xl xl:mb-24">

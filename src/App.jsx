@@ -10,6 +10,7 @@ import Roadmap from "./components/Roadmap";
 import Services from "./components/Services";
 import Auth from "./components/Auth";
 import Chatroom from "./components/Chatroom";
+import PricingPage from "./components/PricingPage";
 
 const App = () => {
   return (
@@ -33,6 +34,7 @@ const App = () => {
           <Route path="/sign-in" element={<Auth />} />
           <Route path="/sign-up" element={<Auth />} />
           <Route path="/chat" element={<Chatroom />} />
+          <Route path="/pricing" element={<PricingPage />} />
         </Routes>
         <Footer />
       </div>
