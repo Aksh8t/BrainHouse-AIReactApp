@@ -140,13 +140,18 @@ app.post("/api/image", async (req, res) => {
 
 // New endpoint: Get or create user data
 app.get("/api/user/:clerkUserId", async (req, res) => {
+  console.log(`Received request for clerkUserId: ${req.params.clerkUserId}`);
   try {
     const { clerkUserId } = req.params;
     let user = await User.findOne({ clerkUserId });
 
     if (!user) {
+      console.log(`User not found, creating new user with clerkUserId: ${clerkUserId}`);
       user = new User({ clerkUserId });
       await user.save();
+      console.log(`User saved with ID: ${user._id}`);
+    } else {
+      console.log(`User found with ID: ${user._id}`);
     }
 
     res.json(user);
