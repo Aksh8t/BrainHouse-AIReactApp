@@ -53,7 +53,7 @@ const PricingPage = () => {
                     <>
                       <div className="h3">₹</div>
                       <div className="text-[5.5rem] leading-none font-bold">
-                        999
+                        {item.price}
                       </div>
                     </>
                   )}
