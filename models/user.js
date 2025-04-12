@@ -1,11 +1,27 @@
+// models/user.js
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-  clerkUserId: { type: String, required: true, unique: true },
-  subscriptionStatus: { type: String, default: "free", enum: ["free", "pro"] },
-  chatAttempts: { type: Number, default: 0 },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
+  clerkUserId: {
+    type: String,
+    required: true,
+    unique: true,
+    index: true, // Added index for performance
+  },
+  subscriptionStatus: {
+    type: String,
+    default: "free",
+    enum: ["free", "pro"], // Ensures only these values are allowed
+  },
+  chatAttempts: {
+    type: Number,
+    default: 0,
+  },
+  // Add any other fields you need for the user here
+}, {
+  timestamps: true // Automatically adds and manages createdAt and updatedAt
 });
 
-export default mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+
+export default User;
