@@ -7,23 +7,7 @@ import Section from "./Section";
 import Heading from "./Heading";
 import { useUser } from "@clerk/clerk-react";
 
-// Function to load Razorpay script
-function loadScript(src) {
-  return new Promise((resolve) => {
-    const script = document.createElement("script");
-    script.src = src;
-    script.onload = () => {
-      resolve(true);
-    };
-    script.onerror = () => {
-      resolve(false);
-    };
-    document.body.appendChild(script);
-  });
-}
-
 const PricingPage = () => {
-  const [loading, setLoading] = useState(false);
   const { user, isLoaded } = useUser();
 
   const handlePayment = async (item) => {
@@ -32,93 +16,24 @@ const PricingPage = () => {
       return;
     }
 
-    setLoading(true);
-
-    const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
-    if (!res) {
-      alert("Razorpay SDK failed to load. Are you online?");
-      setLoading(false);
-      return;
-    }
-
     try {
-      const orderResponse = await fetch("/api/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: item.price * 100,
-          currency: "INR",
-          clerkUserId: user.id,
-        }),
-      });
-
-      if (!orderResponse.ok) {
-        throw new Error(`Failed to create order: ${orderResponse.statusText}`);
-      }
-
-      const order = await orderResponse.json();
-      if (!order.id || !order.amount) {
-        throw new Error("Invalid order response from server");
-      }
-
-      const options = {
-        key: import.meta.env.VITE_RZP_KEY_ID,
-        amount: order.amount,
-        currency: "INR",
-        name: "BrainHouse",
-        description: item.title,
-        order_id: order.id,
-        handler: async function (response) {
-          const verifyResponse = await fetch("/api/verify-payment", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_signature: response.razorpay_signature,
-              clerkUserId: user.id,
-              amount: item.price * 100,
-            }),
-          });
-
-          const verifyResult = await verifyResponse.json();
-          if (verifyResult.success) {
-            alert("Payment successful and subscription updated!");
-          } else {
-            alert("Payment verification failed. Please contact support.");
-          }
-        },
-        prefill: {
-          name: user.fullName || "Customer Name",
-          email: user.emailAddresses[0]?.emailAddress || "customer@example.com",
-          contact: user.phoneNumbers[0]?.phoneNumber || "9999999999",
-        },
-        theme: {
-          color: "#3399cc",
-        },
-        modal: {
-          ondismiss: () => {
-            setLoading(false);
-          },
-        },
-      };
-
-      const paymentObject = new window.Razorpay(options);
-      paymentObject.open();
+      const paymentUrl = `https://razorpay.me/@brainhouse`;
+      window.location.href = paymentUrl;
     } catch (error) {
-      console.error("Payment error:", error.message);
-      alert(`Payment failed: ${error.message}. Please try again or contact support.`);
-    } finally {
-      setLoading(false);
+      console.error("Payment redirection error:", error.message);
+      alert(
+        `Failed to redirect to payment page: ${error.message}. Please try again or contact support.`
+      );
     }
   };
 
   return (
     <Section className="overflow-hidden" id="pricing">
       <div className="container relative z-2">
-        <Heading tag="Choose your plan" title="Flexible pricing for all needs" />
+        <Heading
+          tag="Choose your plan"
+          title="Flexible pricing for all needs"
+        />
 
         <div className="relative">
           <div className="flex gap-[1rem] max-lg:flex-wrap">
@@ -136,9 +51,9 @@ const PricingPage = () => {
                 <div className="flex items-center h-[5.5rem] mb-6">
                   {item.price && (
                     <>
-                      <div className="h3">$</div>
+                      <div className="h3">₹</div>
                       <div className="text-[5.5rem] leading-none font-bold">
-                        {item.price}
+                        999
                       </div>
                     </>
                   )}
@@ -148,13 +63,9 @@ const PricingPage = () => {
                   className="w-full mb-6"
                   onClick={() => item.price && handlePayment(item)}
                   white={!!item.price}
-                  disabled={loading || !item.price || !isLoaded || !user}
+                  disabled={!item.price || !isLoaded || !user}
                 >
-                  {loading && item.price
-                    ? "Processing..."
-                    : item.price
-                    ? "Pay Now"
-                    : "Contact us"}
+                  {item.price ? "Pay Now" : "Contact us"}
                 </Button>
 
                 <ul>

@@ -1,14 +1,28 @@
 import React from "react";
 import Section from "./Section";
-import { FaTwitter, FaInstagram, FaGithub, FaLinkedin, FaYoutube, FaDribbble } from "react-icons/fa";
+import {
+  FaTwitter,
+  FaInstagram,
+  FaGithub,
+  FaLinkedin,
+  FaYoutube,
+} from "react-icons/fa";
+import upiQrCode from "../assets/upi.jpg";
 
 const socials = [
   { id: "twitter", icon: <FaTwitter />, url: "https://twitter.com/Akshat_35" },
-  { id: "instagram", icon: <FaInstagram />, url: "https://instagram.com/Aksh8t" },
+  {
+    id: "instagram",
+    icon: <FaInstagram />,
+    url: "https://instagram.com/Aksh8t",
+  },
   { id: "github", icon: <FaGithub />, url: "https://github.com/Aksh8t" },
-  { id: "linkedin", icon: <FaLinkedin />, url: "https://linkedin.com/in/Aksh8t" },
+  {
+    id: "linkedin",
+    icon: <FaLinkedin />,
+    url: "https://linkedin.com/in/Aksh8t",
+  },
   { id: "youtube", icon: <FaYoutube />, url: "https://youtube.com/@Aksh8t" },
-  { id: "dribbble", icon: <FaDribbble />, url: "https://dribbble.com/Aksh8t" },
 ];
 
 const Footer = () => {
@@ -16,7 +30,8 @@ const Footer = () => {
     <Section crosses className="!px-0 !py-10">
       <div className="container relative z-10 backdrop-blur-md bg-white/5 border border-white/10 shadow-md rounded-3xl px-6 py-10 flex flex-col sm:flex-row justify-between items-center gap-6 text-white">
         <p className="text-sm sm:text-base text-gray-400 text-center sm:text-left">
-          © {new Date().getFullYear()}. All rights reserved. Built with 💻 by <span className="text-blue-400 font-semibold">Akshat Tiwari</span>
+          © {new Date().getFullYear()}. All rights reserved. Built with ❤️ by{" "}
+          <span className="text-blue-400 font-semibold">Akshat Tiwari</span>
         </p>
 
         <ul className="flex gap-5 flex-wrap justify-center">
@@ -32,6 +47,15 @@ const Footer = () => {
             </a>
           ))}
         </ul>
+
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-sm text-gray-400">Support with UPI</p>
+          <img
+            src={upiQrCode}
+            alt="UPI QR Code"
+            className="w-24 h-128 sm:w-64 sm:h-85 rounded-lg border border-white/10 shadow-md"
+          />
+        </div>
       </div>
     </Section>
   );
