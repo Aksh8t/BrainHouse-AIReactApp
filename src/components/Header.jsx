@@ -1,117 +1,135 @@
-import { useState, useEffect } from "react";
+"use client";
+import {
+  Navbar,
+  NavBody,
+  NavItems,
+  MobileNav,
+  NavbarLogo,
+  NavbarButton,
+  MobileNavHeader,
+  MobileNavToggle,
+  MobileNavMenu,
+} from "./design/resizable-navbar.jsx";
+import { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { disablePageScroll, enablePageScroll } from "scroll-lock";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
-
 import { brainwave } from "../assets";
 import { navigation } from "../constants";
-import Button from "./Button";
-import MenuSvg from "../assets/svg/MenuSvg";
-import { HamburgerMenu } from "./design/Header";
-
 const Header = () => {
   const { pathname } = useLocation();
-  const [openNavigation, setOpenNavigation] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  const toggleNavigation = () => {
-    if (openNavigation) {
-      setOpenNavigation(false);
-      enablePageScroll();
-    } else {
-      setOpenNavigation(true);
-      disablePageScroll();
-    }
-  };
-
-  const handleClick = () => {
-    if (!openNavigation) return;
-    enablePageScroll();
-    setOpenNavigation(false);
-  };
-
-  // Add a scroll event listener to show/hide the navbar
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-
-      // Hide navbar when scrolling down, show when scrolling up.
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Scrolled down – hide navbar if scrolled down more than 100px
         setShowNavbar(false);
       } else {
-        // Scrolled up – show navbar
         setShowNavbar(true);
       }
       setLastScrollY(currentScrollY);
     };
 
     window.addEventListener("scroll", handleScroll);
-
-    // Cleanup function: remove the event listener when the component unmounts
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
+
+  const navItems = navigation.map((item) => ({
+    name: item.title,
+    link: item.url,
+  }));
 
   return (
     <div
-      className={`fixed top-0 left-0 w-full z-50 border-b border-n-6 lg:bg-n-8/90 lg:backdrop-blur-sm transition-transform duration-300 ${
+      className={`fixed top-0 left-0 w-full z-50 transition-transform duration-300 ${
         showNavbar ? "translate-y-0" : "-translate-y-full"
-      } ${openNavigation ? "bg-n-8" : "bg-n-8/90 backdrop-blur-sm"}`}
+      }`}
     >
-      <div className="flex items-center px-5 lg:px-7.5 xl:px-10 max-lg:py-4">
-        <a className="block w-[12rem] xl:mr-8" href="#hero">
-          <img src={brainwave} width={190} height={40} alt="Brainwave" />
-        </a>
+      <Navbar>
+        <NavBody>
+          {/* Logo */}
+          <a href="/" className="w-[12rem]">
+            <img src={brainwave} width={190} height={40} alt="Brainwave" />
+          </a>
 
-        <nav
-          className={`${
-            openNavigation ? "flex" : "hidden"
-          } fixed top-[5rem] left-0 right-0 bottom-0 bg-n-8 lg:static lg:flex lg:mx-auto lg:bg-transparent`}
-        >
-          <div className="relative z-2 flex flex-col items-center justify-center m-auto lg:flex-row">
-            {navigation.map((item) => (
-              <a
-                key={item.id}
-                href={item.url}
-                onClick={handleClick}
-                className={`block relative font-code text-2xl uppercase text-n-1 transition-colors hover:text-color-1 ${
-                  item.onlyMobile ? "lg:hidden" : ""
-                } px-6 py-6 md:py-8 lg:-mr-0.25 lg:text-xs lg:font-semibold ${
-                  item.url === pathname.hash ? "z-2 lg:text-n-1" : "lg:text-n-1/50"
-                } lg:leading-5 lg:hover:text-n-1 xl:px-12`}
+          {/* Desktop nav links */}
+          <NavItems items={navItems} />
+
+          {/* Auth / Buttons */}
+          <div className="flex items-center gap-4">
+            <SignedOut>
+              <Link
+                to="/sign-up"
+                className="text-sm text-neutral-500 hover:text-neutral-900"
               >
-                {item.title}
+                New account
+              </Link>
+              <SignInButton mode="modal" redirectUrl="/">
+                <NavbarButton variant="secondary">Sign in</NavbarButton>
+              </SignInButton>
+            </SignedOut>
+
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+          </div>
+        </NavBody>
+
+        {/* Mobile nav */}
+        <MobileNav>
+          <MobileNavHeader>
+            <a href="/" className="w-[12rem]">
+              <img src={brainwave} width={190} height={40} alt="Brainwave" />
+            </a>
+            <MobileNavToggle
+              isOpen={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            />
+          </MobileNavHeader>
+
+          <MobileNavMenu
+            isOpen={isMobileMenuOpen}
+            onClose={() => setIsMobileMenuOpen(false)}
+          >
+            {navItems.map((item, idx) => (
+              <a
+                key={`mobile-link-${idx}`}
+                href={item.link}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="relative text-neutral-600 dark:text-neutral-300"
+              >
+                <span className="block">{item.name}</span>
               </a>
             ))}
-          </div>
-          <HamburgerMenu />
-        </nav>
+            <div className="flex w-full flex-col gap-4">
+              <SignedOut>
+                <SignInButton mode="modal" redirectUrl="/">
+                  <NavbarButton
+                    variant="primary"
+                    className="w-full"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Sign in
+                  </NavbarButton>
+                </SignInButton>
+              </SignedOut>
 
-        <SignedOut>
-          <Link
-            to="/sign-up"
-            className="hidden mr-8 text-n-1/50 transition-colors hover:text-n-1 lg:block"
-          >
-            New account
-          </Link>
-          <SignInButton mode="modal" redirectUrl="/">
-            <Button className="hidden lg:flex">
-              Sign in
-            </Button>
-          </SignInButton>
-        </SignedOut>
+              <SignedIn>
+                <NavbarButton
+                  variant="primary"
+                  className="w-full"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <UserButton afterSignOutUrl="/" />
+                </NavbarButton>
+              </SignedIn>
 
-        <SignedIn>
-          <UserButton afterSignOutUrl="/" />
-        </SignedIn>
-
-        <Button className="ml-auto lg:hidden" px="px-3" onClick={toggleNavigation}>
-          <MenuSvg openNavigation={openNavigation} />
-        </Button>
-      </div>
+            </div>
+          </MobileNavMenu>
+        </MobileNav>
+      </Navbar>
     </div>
   );
 };
