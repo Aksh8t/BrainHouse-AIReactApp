@@ -70,7 +70,7 @@ const Chatroom = () => {
 
   useEffect(() => {
     return () => {
-      uploadedFiles.forEach(f => {
+      uploadedFiles.forEach((f) => {
         if (f.url) URL.revokeObjectURL(f.url);
       });
     };
@@ -79,37 +79,48 @@ const Chatroom = () => {
   const handleSendMessage = async () => {
     const currentInput = input.trim();
     if (!currentInput && uploadedFiles.length === 0) return;
+
     const userMessage = {
       role: "user",
       content: currentInput,
       files: uploadedFiles.length > 0 ? uploadedFiles : undefined,
     };
+
     setMessages((prev) => [...prev, userMessage]);
     const currentMessageHistory = [...messages, userMessage];
+
     setInput("");
     setUploadedFiles([]);
     setLoading(true);
+
     try {
       const baseURL =  "http://localhost:5000/api/";
       if (!baseURL) {
         throw new Error("API base URL not configured.");
       }
+
       let endpoint = baseURL;
       let body = {};
+
       if (mode === "text") {
         endpoint += "text";
-        body = { messages: currentMessageHistory, model: selectedModel.toLowerCase() };
+        body = {
+          messages: currentMessageHistory,
+          model: selectedModel.toLowerCase(),
+        };
       } else if (mode === "image") {
         endpoint += "image";
         body = { prompt: currentInput };
       } else {
         throw new Error("Invalid mode selected");
       }
+
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
+
       if (!response.ok) {
         let errorData;
         try {
@@ -117,14 +128,32 @@ const Chatroom = () => {
         } catch (e) {
           throw new Error(`${mode} failed: ${response.statusText}`);
         }
-        throw new Error(errorData.error || errorData.message || `${mode} failed: ${response.statusText}`);
+        throw new Error(
+          errorData.error ||
+            errorData.message ||
+            `${mode} failed: ${response.statusText}`
+        );
       }
+
       const data = await response.json();
-      if (mode === "text") setMessages((prev) => [...prev, { role: "model", content: data.content }]);
-      else if (mode === "image") setMessages((prev) => [...prev, { role: "model", content: "Generated image:", image: data.image }]);
+
+      if (mode === "text") {
+        setMessages((prev) => [
+          ...prev,
+          { role: "model", content: data.content },
+        ]);
+      } else if (mode === "image") {
+        setMessages((prev) => [
+          ...prev,
+          { role: "model", content: "Generated image:", image: data.image },
+        ]);
+      }
     } catch (error) {
       console.error("API Error:", error);
-      setMessages((prev) => [...prev, { role: "model", content: `Error: ${error.message}` }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "model", content: `Error: ${error.message}` },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -164,32 +193,43 @@ const Chatroom = () => {
 
   const handleFiles = (files) => {
     if (mode !== "text") return;
-    const imageFiles = Array.from(files).filter(f => f.type.startsWith("image/"));
-    if (imageFiles.length !== files.length) console.warn("Non-image files ignored.");
-    const filePromises = imageFiles.map(file => new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve({
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        data: reader.result,
-        url: URL.createObjectURL(file)
-      });
-      reader.onerror = (err) => {
-        console.error("FileReader error:", err);
-        reject(err);
-      };
-      reader.readAsDataURL(file);
-    }));
+
+    const imageFiles = Array.from(files).filter((f) =>
+      f.type.startsWith("image/")
+    );
+    if (imageFiles.length !== files.length) {
+      console.warn("Non-image files were selected and ignored.");
+    }
+
+    const filePromises = imageFiles.map(
+      (file) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () =>
+            resolve({
+              name: file.name,
+              type: file.type,
+              size: file.size,
+              data: reader.result,
+              url: URL.createObjectURL(file),
+            });
+          reader.onerror = (err) => {
+            console.error("FileReader error:", err);
+            reject(err);
+          };
+          reader.readAsDataURL(file);
+        })
+    );
+
     Promise.all(filePromises)
-      .then(newFiles => setUploadedFiles(prev => [...prev, ...newFiles]))
-      .catch(err => console.error("Error processing files:", err));
+      .then((newFiles) => setUploadedFiles((prev) => [...prev, ...newFiles]))
+      .catch((err) => console.error("Error processing files:", err));
   };
 
   const removeFile = (index) => {
     const file = uploadedFiles[index];
     if (file?.url) URL.revokeObjectURL(file.url);
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -197,8 +237,17 @@ const Chatroom = () => {
       <SignedIn>
         <div className="flex flex-col h-screen bg-black text-white relative">
           <div className="absolute inset-0 z-0 pointer-events-none">
-            <svg className="w-full h-full opacity-15" width="100%" height="100%">
-              <pattern id="dotPattern" width="20" height="20" patternUnits="userSpaceOnUse">
+            <svg
+              className="w-full h-full opacity-15"
+              width="100%"
+              height="100%"
+            >
+              <pattern
+                id="dotPattern"
+                width="20"
+                height="20"
+                patternUnits="userSpaceOnUse"
+              >
                 <circle cx="2" cy="2" r="1" fill="white" />
               </pattern>
               <rect width="100%" height="100%" fill="url(#dotPattern)" />
@@ -211,11 +260,18 @@ const Chatroom = () => {
                 BrainHouse
               </h1>
               <p className="mt-3 text-base md:text-lg text-gray-400 italic">
-                The <span className="text-xl md:text-2xl font-semibold text-gray-300 not-italic">∞</span> Research Den
+                The{" "}
+                <span className="text-xl md:text-2xl font-semibold text-gray-300 not-italic">
+                  ∞
+                </span>{" "}
+                Research Den
               </p>
             </div>
 
-            <div className="flex-1 px-4 md:px-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent pb-32" style={{ overscrollBehavior: "contain" }}>
+            <div
+              className="flex-1 px-4 md:px-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent pb-32"
+              style={{ overscrollBehavior: "contain" }}
+            >
               {messages.length === 0 && !loading && (
                 <div className="flex flex-col items-center justify-center h-full text-gray-400">
                   <div className="w-16 h-16 mb-4 border-4 border-gray-600 rounded-full flex items-center justify-center shadow-md">
@@ -226,11 +282,21 @@ const Chatroom = () => {
               )}
 
               {messages.map((msg, index) => (
-                <div key={`${msg.role}-${index}-${Date.now()}`} className="relative mb-6 animate-fade-in">
-                  <GlowingEffect spread={20} proximity={40} />
-                  <div className={`relative p-4 rounded-xl overflow-hidden ${
-                    msg.role === "user" ? "bg-gray-800 ml-auto max-w-[80%]" : "bg-gray-900 border border-gray-700 mr-auto max-w-[80%]"
-                  }`}>
+                <div
+                  key={`${msg.role}-${index}-${Date.now()}`}
+                  className="relative mb-6 animate-fade-in"
+                >
+                  <GlowingEffect
+                    spread={msg.role === "user" ? 20 : 15}
+                    proximity={msg.role === "user" ? 40 : 30}
+                  />
+                  <div
+                    className={`relative p-4 rounded-xl overflow-hidden ${
+                      msg.role === "user"
+                        ? "bg-gray-800 ml-auto max-w-[80%]"
+                        : "bg-gray-900 border border-gray-700 mr-auto max-w-[80%]"
+                    }`}
+                  >
                     {msg.role === "user" && msg.files?.length > 0 && (
                       <div className="flex flex-wrap gap-2 mb-2">
                         {msg.files.map((file, fileIndex) => (
@@ -244,15 +310,16 @@ const Chatroom = () => {
                         ))}
                       </div>
                     )}
-                    {msg.content && (
-                      msg.role === "model" ? (
+                    {msg.content &&
+                      (msg.role === "model" ? (
                         <div className="markdown-content text-white">
                           <ReactMarkdown>{msg.content}</ReactMarkdown>
                         </div>
                       ) : (
-                        <p className="text-white whitespace-pre-wrap break-words">{msg.content}</p>
-                      )
-                    )}
+                        <p className="text-white whitespace-pre-wrap break-words">
+                          {msg.content}
+                        </p>
+                      ))}
                     {msg.role === "model" && msg.image && (
                       <img
                         src={msg.image}
@@ -279,12 +346,21 @@ const Chatroom = () => {
             <div className="flex-shrink-0 px-4 md:px-6 pb-4 pt-2 bg-gradient-to-t from-black via-black to-transparent z-20">
               <div className="relative max-w-4xl mx-auto">
                 <GlowingEffect spread={30} proximity={50} />
-                <div className="relative bg-gray-800 rounded-xl shadow-xl p-3 md:p-4 border border-gray-700 overflow-hidden">
+                <div
+                  className={`relative bg-gray-800 rounded-xl shadow-xl p-3 md:p-4 border border-gray-700 overflow-hidden`}
+                  onDragEnter={handleDrag}
+                  onDragOver={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDrop={handleDrop}
+                >
                   {uploadedFiles.length > 0 && (
                     <div className="files-preview pb-3 border-b border-gray-700 mb-3">
                       <div className="flex flex-wrap gap-2">
                         {uploadedFiles.map((file, index) => (
-                          <div key={index} className="relative bg-gray-900 rounded-lg p-1 border border-gray-700">
+                          <div
+                            key={index}
+                            className="relative bg-gray-900 rounded-lg p-1 border border-gray-700"
+                          >
                             <img
                               src={file.url}
                               alt={file.name}
@@ -302,9 +378,12 @@ const Chatroom = () => {
                       </div>
                     </div>
                   )}
+
                   <div
                     className={`flex items-center gap-2 md:gap-3 w-full ${
-                      dragActive && mode === 'text' ? "outline outline-dashed outline-blue-500 outline-offset-4 rounded-lg" : ""
+                      dragActive && mode === "text"
+                        ? "outline outline-dashed outline-blue-500 outline-offset-4 rounded-lg"
+                        : ""
                     }`}
                     onDragEnter={handleDrag}
                     onDragOver={handleDrag}
@@ -340,7 +419,9 @@ const Chatroom = () => {
                       <button
                         onClick={() => setMode("text")}
                         className={`px-3 py-1 rounded-md text-sm transition-colors ${
-                          mode === "text" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
+                          mode === "text"
+                            ? "bg-blue-600 text-white"
+                            : "text-gray-400 hover:text-white"
                         }`}
                       >
                         Text
@@ -348,7 +429,9 @@ const Chatroom = () => {
                       <button
                         onClick={() => setMode("image")}
                         className={`px-3 py-1 rounded-md text-sm transition-colors ${
-                          mode === "image" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
+                          mode === "image"
+                            ? "bg-blue-600 text-white"
+                            : "text-gray-400 hover:text-white"
                         }`}
                       >
                         Image
@@ -376,16 +459,21 @@ const Chatroom = () => {
                         placeholders={chatPlaceholders}
                         onChange={handleInputChange}
                         onSubmit={handleInputSubmit}
+                        value={input}
                       />
-                      {dragActive && mode === 'text' && (
+                      {dragActive && mode === "text" && (
                         <div className="absolute inset-0 bg-gray-800 bg-opacity-80 flex items-center justify-center rounded-lg pointer-events-none">
-                          <p className="text-blue-400 font-semibold">Drop image files here</p>
+                          <p className="text-blue-400 font-semibold">
+                            Drop image files here
+                          </p>
                         </div>
                       )}
                     </div>
                     <button
                       onClick={handleSendMessage}
-                      disabled={loading || (!input.trim() && uploadedFiles.length === 0)}
+                      disabled={
+                        loading || (!input.trim() && uploadedFiles.length === 0)
+                      }
                       className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-shrink-0"
                       aria-label="Send message"
                     >
@@ -398,6 +486,7 @@ const Chatroom = () => {
           </div>
         </div>
       </SignedIn>
+
       <SignedOut>
         <RedirectToSignIn />
       </SignedOut>
