@@ -94,7 +94,7 @@ const Chatroom = () => {
     setLoading(true);
 
     try {
-      const baseURL =  "https://brainhouse.vercel.app/";
+      const baseURL =  "https://brainhouse.vercel.app/api/";
       if (!baseURL) {
         throw new Error("API base URL not configured.");
       }
